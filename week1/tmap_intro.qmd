@@ -42,9 +42,9 @@ There are MANY different ways to make maps in R, all with different pros/cons. C
 
 
 ```{r}
-install.packages("sf")
-install.packages("stars")
-install.packages("tmap")
+#install.packages("sf")
+#install.packages("stars")
+#install.packages("tmap")
 ```
 
 ```{r}
@@ -532,13 +532,27 @@ Similar to the `theme()` function in `ggplot2`, the `tm_layout()` function in `t
 # more options!
 
 tm_shape(world_vector) +
-  tm_polygons(fill = "wb_income_region",
-              fill.legend = tm_legend(title = "Regional Income")) +
+  tm_polygons(fill = "wb_income_region", # fill by income
+              fill.legend = tm_legend(title = "Regional Income")) + # legend title
   tm_title(text = "Global Income", 
            frame = TRUE) + # puts a box around the title
-  tm_layout(text.fontfamily = "Arial",
-            style = "beaver",
-            bg.color = "grey95")
+  tm_layout(text.fontfamily = "Arial", # change font of text
+            style = "beaver", # color scheme
+            bg.color = "grey95", # background color
+            color_vision_deficiency_sim = ("protan"),
+            frame.color = "blue",
+            frame.double_line = TRUE) + # double frame!
+  tm_crs("+proj=eqearth")
+```
+
+
+```{r}
+# specifying bins of legend (but doesn't actually work for me)
+
+tm_shape(world_vector) +
+  tm_polygons(fill = "gdp_per_cap",
+              fill.scale = tm_scale(breaks = c(0, 5000, 20000, 50000, Inf),
+                                    levels = c("Low", "Medium", "High", "Very High")))
 ```
 
 
@@ -548,13 +562,20 @@ tm_shape(world_vector) +
 One of the most powerful aspects of `tmap` is the ease of creating interactive maps. `tmap` has two modes `"plot"` which creates static maps and `"view"` which creates interactive maps that can be easily embedded in quarto docs. It's as easy as using the `tmap_mode()`!
 
 ```{r}
+# running this line will change the mode of R, meaning that all the maps we make now will be interactive
+tmap_mode("view")
+```
 
+```{r}
+tm_shape(world_vector) +
+  tm_polygons(fill = "gdp_per_cap",
+              fill.legend = tm_legend(title = "GDP Per Capita"))
 ```
 
 To return to regular plotting mode, simply reset `tmap_mode`.
 
 ```{r}
-
+tmap_mode("plot")
 ```
 
 ## 8. Saving maps
@@ -562,7 +583,10 @@ To return to regular plotting mode, simply reset `tmap_mode`.
 Maps can be stored as objects for for adding additional layers and saving programmatically. Maps can be saved directly in `tmap` using the `tm_save()` function. 
 
 ```{r}
+map1 <- tm_shape(world_vector) +
+  tm_polygons(fill = "gdp_per_cap",
+              fill.legend = tm_legend(title = "GDP Per Capita"))
 
-
+tmap_save(map1, here::here("week1", "tmap_example.png")) # last piece is always just what you want to call the file
 ```
 
